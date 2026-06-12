@@ -68,21 +68,17 @@ A right-side slide-out panel for study notes, active learning, and embedded cont
 
 ## Roadmap
 
-The project roadmap outlines upcoming features, improvements, and long‑term goals for DashPirational.
+The project roadmap/documentation outlines upcoming features, improvements, and long‑term goals for DashPirational.
 
-You can view the full roadmap here:
+<h2>Documentation</h2>
+<ul>
+  <li><a href="ROADMAP.md">Roadmap</a></li>
+  <li><a href="CHANGELOG.md">Changelog</a></li>
+  <li><a href="CONTRIBUTING.md">Contributing</a></li>
+</ul>
 
-[View Roadmap](ROADMAP.md)
 
-
-## Changelog
-
-See CHANGELOG.md.
-
-## Contributing
-
-See CONTRIBUTING.md.
-
+ 
 ## Deployment
 
 To deploy on GitHub Pages:
