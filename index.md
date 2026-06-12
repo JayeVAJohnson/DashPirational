@@ -13,9 +13,17 @@ DashPirational includes:
 - Floating theme switcher
 - Responsive layout
 
-## Open Dashboard
+# DashPirational Dashboard
+
+This is the main dashboard interface for DashPirational.  
+To view the full interactive version, open the HTML dashboard below.
 
 [Open Dashboard](dashboard.html)
+
+## Return to Landing Page
+
+[Back to Landing Page](index.html)
+
 
 ## View Demo
 
