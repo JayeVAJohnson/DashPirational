@@ -1,363 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Local Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Local Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* ---------------------------------------------------
+       THEME VARIABLES (LIGHT + DARK + LAVENDER)
+    --------------------------------------------------- */
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #d4d7dd;
+      --text: #1e293b;
+      --muted: #6b7280;
+      --accent: #0ea5e9;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .lavender {
+      --bg: #f3e8ff;
+      --card: #faf5ff;
+      --border: #e9d5ff;
+      --text: #4c1d95;
+      --muted: #6d28d9;
+      --accent: #a855f7;
+      --shadow: 0 4px 12px rgba(76,29,149,0.18);
+    }
 
-<style>
-/* ---------------------------------------------------
-   THEME VARIABLES (LIGHT + DARK + LAVENDER)
---------------------------------------------------- */
-:root {
-  --bg: #f5f7fa;
-  --card: #ffffff;
-  --border: #d4d7dd;
-  --text: #1e293b;
-  --muted: #6b7280;
-  --accent: #0ea5e9;
-  --radius: 12px;
-  --shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-.dark {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --border: #334155;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --accent: #38bdf8;
-  --shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
-.lavender {
-  --bg: #f3e8ff;
-  --card: #faf5ff;
-  --border: #e9d5ff;
-  --text: #4c1d95;
-  --muted: #6d28d9;
-  --accent: #a855f7;
-  --shadow: 0 4px 12px rgba(76,29,149,0.18);
-}
+    /* ---------------------------------------------------
+       GLOBAL
+    --------------------------------------------------- */
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
 
-/* ---------------------------------------------------
-   GLOBAL
---------------------------------------------------- */
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s, color 0.3s;
-}
-.layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
+    /* ---------------------------------------------------
+       SIDEBAR
+    --------------------------------------------------- */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: width 0.3s;
+    }
+    .sidebar.collapsed {
+      width: 60px;
+      overflow: hidden;
+    }
+    .nav-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    .nav-item {
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-item:hover {
+      background: rgba(14,165,233,0.15);
+      color: var(--accent);
+    }
+    .nav-item.active {
+      background: rgba(14,165,233,0.25);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-item span.label { white-space: nowrap; }
+    .sidebar.collapsed .nav-item span.label { display:none; }
+    .sidebar.collapsed .nav-section-label { display:none; }
 
-/* ---------------------------------------------------
-   SIDEBAR
---------------------------------------------------- */
-.sidebar {
-  background: var(--card);
-  border-right: 1px solid var(--border);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  transition: width 0.3s;
-}
-.sidebar.collapsed {
-  width: 60px;
-  overflow: hidden;
-}
-.nav-section-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 10px;
-  margin-bottom: 4px;
-}
-.nav-item {
-  padding: 8px 10px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.nav-item:hover {
-  background: rgba(14,165,233,0.15);
-  color: var(--accent);
-}
-.nav-item.active {
-  background: rgba(14,165,233,0.25);
-  color: var(--accent);
-  font-weight: 600;
-}
-.nav-item span.label { white-space: nowrap; }
-.sidebar.collapsed .nav-item span.label { display:none; }
-.sidebar.collapsed .nav-section-label { display:none; }
+    /* ---------------------------------------------------
+       MAIN + TOPBAR
+    --------------------------------------------------- */
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toggle-btn {
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .toggle-btn:hover {
+      background: rgba(14,165,233,0.15);
+      color: var(--accent);
+    }
 
-/* ---------------------------------------------------
-   MAIN + TOPBAR
---------------------------------------------------- */
-.main {
-  display: flex;
-  flex-direction: column;
-}
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.toggle-btn {
-  padding: 6px 10px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--card);
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 13px;
-}
-.toggle-btn:hover {
-  background: rgba(14,165,233,0.15);
-  color: var(--accent);
-}
+    .main-inner {
+      padding: 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-.main-inner {
-  padding: 20px 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+    /* ---------------------------------------------------
+       STUDY PANEL (COLLAPSIBLE)
+    --------------------------------------------------- */
+    .study-panel {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 30px;
+      animation: slideDown 0.25s ease-out;
+    }
+    .hidden {
+      display: none;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-/* ---------------------------------------------------
-   STUDY PANEL (COLLAPSIBLE)
---------------------------------------------------- */
-.study-panel {
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 30px;
-  animation: slideDown 0.25s ease-out;
-}
-.hidden {
-  display: none;
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+    /* ---------------------------------------------------
+       TOP IMAGE (BANNER)
+    --------------------------------------------------- */
+    .top-image {
+      width: 100%;
+      height: 160px;
+      border-radius: var(--radius);
+      background: #d9e3f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 18px;
+      border: 1px solid var(--border);
+    }
 
-/* ---------------------------------------------------
-   TOP IMAGE (BANNER)
---------------------------------------------------- */
-.top-image {
-  width: 100%;
-  height: 160px;
-  border-radius: var(--radius);
-  background: #d9e3f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 18px;
-  border: 1px solid var(--border);
-}
+    /* ---------------------------------------------------
+       COLUMNS + RESIZING
+    --------------------------------------------------- */
+    .columns-wrapper {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1.2fr;
+      gap: 10px;
+    }
+    .column {
+      position: relative;
+    }
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: -4px;
+      width: 8px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
 
-/* ---------------------------------------------------
-   COLUMNS + RESIZING
---------------------------------------------------- */
-.columns-wrapper {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1.2fr;
-  gap: 10px;
-}
-.column {
-  position: relative;
-}
-.resize-handle {
-  position: absolute;
-  top: 0;
-  right: -4px;
-  width: 8px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 5;
-}
+    /* ---------------------------------------------------
+       CARDS
+    --------------------------------------------------- */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      height: 100%;
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
 
-/* ---------------------------------------------------
-   CARDS
---------------------------------------------------- */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 14px;
-  box-shadow: var(--shadow);
-  height: 100%;
-}
-.card h2 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
+    /* ---------------------------------------------------
+       TOGGLES
+    --------------------------------------------------- */
+    details {
+      margin-top: 8px;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.02);
+    }
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    details[open] {
+      background: rgba(14,165,233,0.08);
+    }
+    .toggle-content {
+      padding: 8px 0 4px 16px;
+      color: var(--muted);
+    }
 
-/* ---------------------------------------------------
-   TOGGLES
---------------------------------------------------- */
-details {
-  margin-top: 8px;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.02);
-}
-summary {
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-}
-details[open] {
-  background: rgba(14,165,233,0.08);
-}
-.toggle-content {
-  padding: 8px 0 4px 16px;
-  color: var(--muted);
-}
+    /* ---------------------------------------------------
+       EMBEDS + WIDGETS
+    --------------------------------------------------- */
+    .embed-box {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .widget-slot {
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      padding: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
 
-/* ---------------------------------------------------
-   EMBEDS + WIDGETS
---------------------------------------------------- */
-.embed-box {
-  border: 1px dashed var(--border);
-  border-radius: var(--radius);
-  padding: 10px;
-  text-align: center;
-  color: var(--muted);
-  margin-bottom: 10px;
-  font-size: 13px;
-}
-.widgets-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-.widget-slot {
-  border-radius: 8px;
-  border: 1px dashed var(--border);
-  padding: 8px;
-  font-size: 13px;
-  color: var(--muted);
-  text-align: center;
-}
+    /* ---------------------------------------------------
+       KANBAN
+    --------------------------------------------------- */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .kanban-column {
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      background: rgba(0,0,0,0.02);
+    }
+    .kanban-column h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+    }
+    .kanban-list {
+      min-height: 80px;
+    }
+    .kanban-card {
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      cursor: grab;
+    }
 
-/* ---------------------------------------------------
-   KANBAN
---------------------------------------------------- */
-.kanban {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-.kanban-column {
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  padding: 6px;
-  background: rgba(0,0,0,0.02);
-}
-.kanban-column h3 {
-  margin: 0 0 6px;
-  font-size: 13px;
-}
-.kanban-list {
-  min-height: 80px;
-}
-.kanban-card {
-  background: var(--card);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  padding: 6px;
-  margin-bottom: 6px;
-  font-size: 13px;
-  cursor: grab;
-}
+    /* ---------------------------------------------------
+       FORMS
+    --------------------------------------------------- */
+    input, textarea, button {
+      font-family: inherit;
+    }
+    .quick-form input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .quick-form button {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .quick-form button:hover {
+      filter: brightness(1.05);
+    }
+    .search-box input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .search-results {
+      font-size: 13px;
+      color: var(--muted);
+    }
 
-/* ---------------------------------------------------
-   FORMS
---------------------------------------------------- */
-input, textarea, button {
-  font-family: inherit;
-}
-.quick-form input {
-  width: 100%;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 6px;
-}
-.quick-form button {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  font-size: 13px;
-}
-.quick-form button:hover {
-  filter: brightness(1.05);
-}
-.search-box input {
-  width: 100%;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 6px;
-}
-.search-results {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* ---------------------------------------------------
-   SEARCH PAGE LAYOUT
---------------------------------------------------- */
-.search-layout {
-  display: grid;
-  grid-template-columns: 1.2fr 2fr;
-  gap: 16px;
-}
-.search-card {
-  height: auto;
-}
-.search-engine-links a {
-  display: block;
-  margin: 4px 0;
-  font-size: 13px;
-  color: var(--accent);
-  text-decoration: none;
-}
-.search-engine-links a:hover {
-  text-decoration: underline;
-}
-</style>
+    /* ---------------------------------------------------
+       SEARCH PAGE LAYOUT
+    --------------------------------------------------- */
+    .search-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 16px;
+    }
+    .search-card {
+      height: auto;
+    }
+    .search-engine-links a {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .search-engine-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
-<body> 
-   <div style="text-align:center; padding: 30px 0; border-bottom: 1px solid #ddd;">
-  <img src="assets/images/banner.png" alt="Dashboard Banner" style="max-width:100%; height:auto;">
-</div>
-
+<body>
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="nav-section-label">Today</div>
     <div class="nav-item active" onclick="showPage('today')">
@@ -393,17 +387,14 @@ input, textarea, button {
     </div>
   </aside>
 
-  <!-- MAIN -->
   <div class="main">
 
-    <!-- TOPBAR -->
     <div class="topbar">
       <button class="toggle-btn" onclick="toggleSidebar()">☰ Sidebar</button>
       <button class="toggle-btn" onclick="toggleStudy()">📚 Study</button>
       <button class="toggle-btn" onclick="cycleTheme()">🎨 Theme</button>
     </div>
 
-    <!-- STUDY PANEL -->
     <div id="studyPanel" class="study-panel hidden">
       <section class="card" style="margin-top:10px;">
         <h2>Study</h2>
@@ -412,11 +403,11 @@ input, textarea, button {
           <summary>Study Queue</summary>
           <div class="toggle-content">
             <ul style="font-size:13px; color:var(--muted); padding-left:18px;">
-              <li>Review Proofs — Tab 1</li>
-              <li>Classify Teachings — Tab 2</li>
-              <li>QC Loop: Yesterday’s Notes</li>
-              <li>Metaphysical Diagnoses — Chapter 3</li>
-              <li>Rewrite 2 insights into “Truth Statements”</li>
+              <li>Read Chapter 1: Introduction to Demo Content</li>
+              <li>Review Flashcards — Deck A</li>
+              <li>Watch Lecture 4: Core Concepts</li>
+              <li>Complete Practice Quiz</li>
+              <li>Draft summary of key terms</li>
             </ul>
           </div>
         </details>
@@ -426,9 +417,9 @@ input, textarea, button {
           <div class="toggle-content">
             <div class="embed-box">
               Currently studying:<br>
-              <strong>Metaphysical Diagnoses — Chapter 3</strong><br><br>
+              <strong>Demo Subject — Chapter 1</strong><br><br>
               Notes open on right panel.<br>
-              PDF loaded locally.<br>
+              Video paused at 14:02.<br>
               AI “Explain this” ready.
             </div>
           </div>
@@ -438,27 +429,23 @@ input, textarea, button {
           <summary>Study Notes</summary>
           <div class="toggle-content">
             <div id="studyNotes" class="search-results">
-              • Truth is the only cause<br>
-              • Error has no principle<br>
-              • Consciousness determines experience<br>
-              • Thought precedes manifestation<br>
+              • Concept A is defined as the foundation of the system.<br>
+              • Always double-check edge cases before moving on.<br>
+              • The primary focus should be on consistent application.<br>
+              • Note to self: Review this section again tomorrow.<br>
             </div>
           </div>
         </details>
-
       </section>
     </div>
 
-    <!-- MAIN INNER -->
     <div class="main-inner">
 
-      <!-- PAGE: TODAY -->
       <div id="page-today">
         <div class="embed-box">
           Add your embedded content here (e.g., Google Calendar, daily doc, or overview).
         </div>
 
-        <!-- LAVENDER BANNER: replace URL with your file path if needed -->
         <div class="top-image" style="
           background-image: url('banner.png');
           background-size: cover;
@@ -467,7 +454,6 @@ input, textarea, button {
 
         <div class="columns-wrapper">
 
-          <!-- COLUMN 1: TODAY -->
           <div class="column">
             <div class="resize-handle"></div>
             <section class="card">
@@ -518,7 +504,6 @@ input, textarea, button {
             </section>
           </div>
 
-          <!-- COLUMN 2: TASKS & KANBAN -->
           <div class="column">
             <div class="resize-handle"></div>
             <section class="card">
@@ -587,7 +572,6 @@ input, textarea, button {
             </section>
           </div>
 
-          <!-- COLUMN 3: ROUTINES -->
           <div class="column">
             <section class="card">
               <h2>Routines & Streaks</h2>
@@ -627,7 +611,6 @@ input, textarea, button {
         </div>
       </div>
 
-      <!-- PAGE: SEARCH -->
       <div id="page-search" style="display:none;">
         <section class="card">
           <h2>Search</h2>
@@ -639,7 +622,6 @@ input, textarea, button {
 
         <div class="search-layout" style="margin-top:16px;">
 
-          <!-- LEFT: LOCAL SEARCH + ENGINE LINKS -->
           <section class="card search-card">
             <h2>Local Search</h2>
             <div class="search-box">
@@ -661,7 +643,6 @@ input, textarea, button {
             </div>
           </section>
 
-          <!-- RIGHT: GOOGLE WEB SEARCH EMBED -->
           <section class="card search-card">
             <h2>Google Web Search (Embedded)</h2>
             <div class="embed-box" style="text-align:left;">
@@ -676,7 +657,6 @@ input, textarea, button {
         </div>
       </div>
 
-      <!-- PAGE: TASKS -->
       <div id="page-tasks" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., Google Sheet of tasks, Kanban, or planning doc).
@@ -703,7 +683,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: ROUTINES -->
       <div id="page-routines" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., habit tracker in Google Sheets).
@@ -718,7 +697,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: PROJECTS -->
       <div id="page-projects" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., master project doc or roadmap).
@@ -733,7 +711,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: CONTENT -->
       <div id="page-content" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., content calendar, ideas doc, or script outline).
@@ -747,7 +724,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: PEOPLE -->
       <div id="page-people" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., relationship map, CRM sheet, or contact notes).
@@ -762,7 +738,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: LIBRARY -->
       <div id="page-library" style="display:none;">
         <div class="embed-box">
           Add your embedded content here (e.g., reading list, PDF index, or study catalog).
@@ -776,7 +751,6 @@ input, textarea, button {
         </section>
       </div>
 
-      <!-- PAGE: SETTINGS -->
       <div id="page-settings" style="display:none;">
         <section class="card">
           <h2>General Settings</h2>
