@@ -72,7 +72,7 @@ The project roadmap outlines upcoming features, improvements, and long‑term go
 
 You can view the full roadmap here:
 
-[View Roadmap](docs/ROADMAP.md)
+[View Roadmap](ROADMAP.md)
 
 
 ## Changelog
