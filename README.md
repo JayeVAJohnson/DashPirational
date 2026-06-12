@@ -68,7 +68,12 @@ A right-side slide-out panel for study notes, active learning, and embedded cont
 
 ## Roadmap
 
-See ROADMAP.md.
+The project roadmap outlines upcoming features, improvements, and long‑term goals for DashPirational.
+
+You can view the full roadmap here:
+
+[View Roadmap](docs/ROADMAP.md)
+
 
 ## Changelog
 
