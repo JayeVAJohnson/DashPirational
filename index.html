@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DashPirational — Personal OS</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/lavender-banner.png" type="image/png">
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #222;
+      --card: #f7f7f7;
+      --accent: #8a4fff;
+      --muted: #666;
+      --border: #e0e0e0;
+    }
+
+    body.dark {
+      --bg: #1a1a1a;
+      --text: #f5f5f5;
+      --card: #2a2a2a;
+      --accent: #b38bff;
+      --muted: #aaa;
+      --border: #333;
+    }
+
+    body.lavender {
+      --bg: #f7f3ff;
+      --text: #3a2a4a;
+      --card: #ffffff;
+      --accent: #b38bff;
+      --muted: #7a6a8a;
+      --border: #e8dfff;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: 240px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    #sidebar h2 {
+      margin-top: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      padding: 10px 0;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .nav-item:hover {
+      color: var(--accent);
+    }
+
+    .nav-item.active-nav {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Main */
+    #main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    /* Embed Boxes */
+    .embed-box {
+      width: 100%;
+      height: 420px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    /* Study Panel */
+    #studyPanel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 320px;
+      height: 100vh;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      display: none;
+    }
+
+    #studyToggle {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    #studyToggle:hover {
+      opacity: 0.9;
+    }
+
+    /* Inputs */
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 120px;
+      resize: vertical;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+  .button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    margin-right: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .button:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+	
+	    /* Responsive */
+    @media (max-width: 900px) {
+      #sidebar {
+        width: 180px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        flex-direction: column;
+      }
+      #sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    /* ========================= */
+    /*     THEME SWITCHER CSS    */
+    /* ========================= */
+
+    #themeSwitcher {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    #themeSwitcher button {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    #themeSwitcher button:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+</style>
+
+	
+	
+</head>
+
+<body class="lavender">
+
+<div id="themeSwitcher">
+  <button onclick="setTheme('light')">☀️</button>
+  <button onclick="setTheme('dark')">🌙</button>
+  <button onclick="setTheme('lavender')">💜</button>
+</div>
+
+<!-- ========================= -->
+<!--          SIDEBAR          -->
+<!-- ========================= -->
+
+<div id="sidebar">
+  <h2>DashPirational</h2>
+
+  <div class="nav-item active-nav" onclick="showPage('today')">Today</div>
+  <div class="nav-item" onclick="showPage('search')">Search</div>
+  <div class="nav-item" onclick="showPage('tasks')">Tasks</div>
+  <div class="nav-item" onclick="showPage('routines')">Routines</div>
+  <div class="nav-item" onclick="showPage('projects')">Projects</div>
+  <div class="nav-item" onclick="showPage('content')">Content</div>
+  <div class="nav-item" onclick="showPage('people')">People</div>
+  <div class="nav-item" onclick="showPage('library')">Library</div>
+  <div class="nav-item" onclick="showPage('settings')">Settings</div>
+</div>
+
+
+<!-- ========================= -->
+<!--           MAIN            -->
+<!-- ========================= -->
+
+<div id="main">
+
+
+<!-- TODAY PAGE -->
+<div id="today" class="page active">
+  <h1 class="page-header">Today</h1>
+  <p class="page-description">Your daily cockpit: quick capture, tasks, widgets, and Kanban.</p>
+
+  <div class="card">
+    <h3>Quick Capture</h3>
+    <textarea placeholder="Write anything here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Quick Tasks</h3>
+    <input type="text" placeholder="Add a quick task...">
+  </div>
+
+  <div class="card">
+    <h3>Google Sheets Kanban</h3>
+    <div class="embed-box">
+      <iframe 
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vREmUSqwcDtYXijs4x_2CiN5AjPWZx_raCAsHXDJn6xJKQ1SuFCB_qXj4WgjbAZ8wir18LEUOFohBTl/pubhtml?widget=true&headers=false"
+        width="100%" height="100%" frameborder="0">
+      </iframe>
+    </div>
+  </div>
+</div>
+
+
+<!-- SEARCH PAGE -->
+<div id="search" class="page">
+  <h1 class="page-header">Search</h1>
+  <p class="page-description">Local dashboard search + Google Web Search.</p>
+
+  <div class="card">
+    <h3>Local Search</h3>
+    <input id="localSearchInput" type="text" placeholder="Search your dashboard..." onkeyup="localSearch()">
+    <div id="localSearchResults" style="margin-top:15px;"></div>
+  </div>
+
+  <div class="card">
+    <h3>Google Web Search</h3>
+    <div class="embed-box">
+      <script async src="https://cse.google.com/cse.js?cx=017576662512468239146:omuauf_lfve"></script>
+      <div class="gcse-search"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- TASKS PAGE -->
+<div id="tasks" class="page">
+  <h1 class="page-header">Tasks</h1>
+  <p class="page-description">Your long-term planning center.</p>
+
+  <div class="card">
+    <h3>Task Notes</h3>
+    <textarea placeholder="Write task notes here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Google Sheets Kanban</h3>
+    <div class="embed-box">
+      <iframe 
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vREmUSqwcDtYXijs4x_2CiN5AjPWZx_raCAsHXDJn6xJKQ1SuFCB_qXj4WgjbAZ8wir18LEUOFohBTl/pubhtml?widget=true&headers=false"
+        width="100%" height="100%" frameborder="0">
+      </iframe>
+    </div>
+  </div>
+</div>
+
+
+<!-- ROUTINES PAGE -->
+<div id="routines" class="page">
+  <h1 class="page-header">Routines</h1>
+  <p class="page-description">Your habit system and daily structure.</p>
+
+  <div class="card">
+    <h3>Routine Notes</h3>
+    <textarea placeholder="Describe your routines..."></textarea>
+  </div>
+</div>
+
+
+<!-- PROJECTS PAGE -->
+<div id="projects" class="page">
+  <h1 class="page-header">Projects</h1>
+  <p class="page-description">Track your active and future projects.</p>
+
+  <div class="card">
+    <h3>Project Notes</h3>
+    <textarea placeholder="Write project notes here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Project Ideas</h3>
+    <textarea placeholder="Brainstorm new project ideas..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Embed Area</h3>
+    <div class="embed-box"></div>
+  </div>
+</div>
+
+
+<!-- CONTENT PAGE -->
+<div id="content" class="page">
+  <h1 class="page-header">Content</h1>
+  <p class="page-description">Your creative and informational workspace.</p>
+
+  <div class="card">
+    <h3>Content Notes</h3>
+    <textarea placeholder="Write content notes here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Content Pipeline</h3>
+    <textarea placeholder="Drafts, ideas, scripts, outlines..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Embed Area</h3>
+    <div class="embed-box"></div>
+  </div>
+</div>
+
+
+<!-- PEOPLE PAGE -->
+<div id="people" class="page">
+  <h1 class="page-header">People</h1>
+  <p class="page-description">Contacts, relationships, and human systems.</p>
+
+  <div class="card">
+    <h3>People Notes</h3>
+    <textarea placeholder="Write notes about people here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Relationship Map</h3>
+    <textarea placeholder="Map your connections, mentors, collaborators..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Embed Area</h3>
+    <div class="embed-box"></div>
+  </div>
+</div>
+
+
+<!-- LIBRARY PAGE -->
+<div id="library" class="page">
+  <h1 class="page-header">Library</h1>
+  <p class="page-description">Your archive of knowledge and references.</p>
+
+  <div class="card">
+    <h3>Library Notes</h3>
+    <textarea placeholder="Write library notes here..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Reading List</h3>
+    <textarea placeholder="Books, articles, PDFs, research topics..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>Embed Area</h3>
+    <div class="embed-box"></div>
+  </div>
+</div>
+
+
+<!-- SETTINGS PAGE -->
+<div id="settings" class="page">
+  <h1 class="page-header">Settings</h1>
+  <p class="page-description">Customize your dashboard and architecture.</p>
+
+  <div class="card">
+    <h3>Theme</h3>
+    <button class="button" onclick="setTheme('light')">Light</button>
+    <button class="button" onclick="setTheme('dark')">Dark</button>
+    <button class="button" onclick="setTheme('lavender')">Lavender</button>
+  </div>
+
+  <div class="card">
+    <h3>General Settings</h3>
+    <p>Future expansion: localStorage, JSON export, and more.</p>
+  </div>
+</div>
+
+
+</div> <!-- end main -->
+
+<!-- ========================= -->
+<!--        STUDY PANEL        -->
+<!-- ========================= -->
+
+<div id="studyPanel">
+  <h2>Study Panel</h2>
+
+  <div class="study-section">
+    <h3>Study Queue</h3>
+    <ul style="font-size:13px; color:var(--muted); padding-left:18px;">
+      <li>Review first‑principles notes</li>
+      <li>Summarize yesterday’s insights</li>
+      <li>Map system inputs and outputs</li>
+      <li>Identify leverage points</li>
+      <li>Draft 3 actionable improvements</li>
+    </ul>
+  </div>
+
+  <div class="study-section">
+    <h3>Active Study Session</h3>
+    <div class="embed-box">
+      Currently studying:<br>
+      <strong>Foundations of Systems Thinking</strong><br><br>
+      Notes open on right panel.<br>
+      PDF loaded locally.<br>
+      “Explain this” ready for deeper analysis.
+    </div>
+  </div>
+
+  <div class="study-section">
+    <h3>Study Notes</h3>
+    <div id="studyNotes" class="search-results">
+      • Key Idea: Understanding first principles<br>
+      • Insight: Systems behave according to their underlying assumptions<br>
+      • Reflection: Awareness precedes improvement<br>
+      • Note: Document patterns, not events<br>
+      • Reminder: Revisit yesterday’s insights for continuity<br>
+    </div>
+  </div>
+</div>
+
+<div id="studyToggle" onclick="toggleStudyPanel()">Study</div>
+<!-- ========================= -->
+<!--     PAGE SWITCHING JS     -->
+<!-- ========================= -->
+ 
+<script>
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  // Show selected page
+  document.getElementById(pageId).classList.add('active');
+
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active-nav'));
+  
+  // Find the nav item that corresponds to this page and make it active
+  const activeNavItem = document.querySelector(`.nav-item[onclick="showPage('${pageId}')"]`);
+  if (activeNavItem) {
+    activeNavItem.classList.add('active-nav');
+  }
+}
+</script>
+
+<!-- ========================= -->
+<!--     LOCAL SEARCH JS       -->
+<!-- ========================= -->
+<script>
+function localSearch() {
+  const query = document.getElementById('localSearchInput').value.toLowerCase();
+  const results = document.getElementById('localSearchResults');
+  results.innerHTML = "";
+
+  if (query.trim() === "") return;
+
+  const cards = document.querySelectorAll('.card');
+
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    if (text.includes(query)) {
+      const div = document.createElement('div');
+      div.style.padding = "10px 0";
+      div.style.borderBottom = "1px solid var(--border)";
+      div.innerText = card.querySelector('h3')?.innerText || "Match found";
+      results.appendChild(div);
+    }
+  });
+}
+</script>
+
+
+<!-- ========================= -->
+<!--   STUDY PANEL TOGGLE JS   -->
+<!-- ========================= -->
+<script>
+function toggleStudyPanel() {
+  const panel = document.getElementById('studyPanel');
+  panel.style.display = (panel.style.display === "block") ? "none" : "block";
+}
+</script>
+
+
+<!-- ========================= -->
+<!--      THEME SWITCHER       -->
+<!-- ========================= -->
+<script>
+function setTheme(theme) {
+  document.body.className = theme;
+}
+</script>
+
+
+</body>
+</html>
+
+
+
