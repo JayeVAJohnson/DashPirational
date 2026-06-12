@@ -72,9 +72,9 @@ The project roadmap/documentation outlines upcoming features, improvements, and 
 
 <h2>Documentation</h2>
 <ul>
-  <li><a href="roadmap.md">Roadmap</a></li>
-  <li><a href="changelog.md">Changelog</a></li>
-  <li><a href="contributing.md">Contributing</a></li>
+  <li><a href="https://github.com/JayeVAJohnson/DashPirational/blob/main/README.md">Roadmap (In thisREADME file)</a></li>
+  <li><a href="https://github.com/JayeVAJohnson/DashPirational/blob/main/changelog.md">Changelog</a></li>
+  <li><a href="https://github.com/JayeVAJohnson/DashPirational/blob/main/contributing.md">Contributing</a></li>
 </ul>
 
 
