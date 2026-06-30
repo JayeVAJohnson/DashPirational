@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Local Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* ---------------------------------------------------
+       THEME VARIABLES (LIGHT + DARK + LAVENDER)
+    --------------------------------------------------- */
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #d4d7dd;
+      --text: #1e293b;
+      --muted: #6b7280;
+      --accent: #0ea5e9;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .lavender {
+      --bg: #f3e8ff;
+      --card: #faf5ff;
+      --border: #e9d5ff;
+      --text: #4c1d95;
+      --muted: #6d28d9;
+      --accent: #a855f7;
+      --shadow: 0 4px 12px rgba(76,29,149,0.18);
+    }
+
+    /* ---------------------------------------------------
+       GLOBAL
+    --------------------------------------------------- */
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ---------------------------------------------------
+       SIDEBAR
+    --------------------------------------------------- */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: width 0.3s;
+    }
+    .sidebar.collapsed {
+      width: 60px;
+      overflow: hidden;
+    }
+    .nav-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    .nav-item {
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-item:hover {
+      background: rgba(14,165,233,0.15);
+      color: var(--accent);
+    }
+    .nav-item.active {
+      background: rgba(14,165,233,0.25);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-item span.label { white-space: nowrap; }
+    .sidebar.collapsed .nav-item span.label { display:none; }
+    .sidebar.collapsed .nav-section-label { display:none; }
+
+    /* ---------------------------------------------------
+       MAIN + TOPBAR
+    --------------------------------------------------- */
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toggle-btn {
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .toggle-btn:hover {
+      background: rgba(14,165,233,0.15);
+      color: var(--accent);
+    }
+
+    .main-inner {
+      padding: 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ---------------------------------------------------
+       STUDY PANEL (COLLAPSIBLE)
+    --------------------------------------------------- */
+    .study-panel {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 30px;
+      animation: slideDown 0.25s ease-out;
+    }
+    .hidden {
+      display: none;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------------------------------------------------
+       TOP IMAGE (BANNER)
+    --------------------------------------------------- */
+    .top-image {
+      width: 100%;
+      height: 160px;
+      border-radius: var(--radius);
+      background: #d9e3f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 18px;
+      border: 1px solid var(--border);
+    }
+
+    /* ---------------------------------------------------
+       COLUMNS + RESIZING
+    --------------------------------------------------- */
+    .columns-wrapper {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1.2fr;
+      gap: 10px;
+    }
+    .column {
+      position: relative;
+    }
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: -4px;
+      width: 8px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
+
+    /* ---------------------------------------------------
+       CARDS
+    --------------------------------------------------- */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      height: 100%;
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    /* ---------------------------------------------------
+       TOGGLES
+    --------------------------------------------------- */
+    details {
+      margin-top: 8px;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.02);
+    }
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    details[open] {
+      background: rgba(14,165,233,0.08);
+    }
+    .toggle-content {
+      padding: 8px 0 4px 16px;
+      color: var(--muted);
+    }
+
+    /* ---------------------------------------------------
+       EMBEDS + WIDGETS
+    --------------------------------------------------- */
+    .embed-box {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .widget-slot {
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      padding: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ---------------------------------------------------
+       KANBAN
+    --------------------------------------------------- */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .kanban-column {
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      background: rgba(0,0,0,0.02);
+    }
+    .kanban-column h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+    }
+    .kanban-list {
+      min-height: 80px;
+    }
+    .kanban-card {
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      cursor: grab;
+    }
+
+    /* ---------------------------------------------------
+       FORMS
+    --------------------------------------------------- */
+    input, textarea, button {
+      font-family: inherit;
+    }
+    .quick-form input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .quick-form button {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .quick-form button:hover {
+      filter: brightness(1.05);
+    }
+    .search-box input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .search-results {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ---------------------------------------------------
+       SEARCH PAGE LAYOUT
+    --------------------------------------------------- */
+    .search-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 16px;
+    }
+    .search-card {
+      height: auto;
+    }
+    .search-engine-links a {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .search-engine-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="nav-section-label">Today</div>
+    <div class="nav-item active" onclick="showPage('today')">
+      <span>☀️</span><span class="label">Today</span>
+    </div>
+    <div class="nav-item" onclick="showPage('search')">
+      <span>🔍</span><span class="label">Search</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tasks')">
+      <span>📝</span><span class="label">Tasks</span>
+    </div>
+    <div class="nav-item" onclick="showPage('routines')">
+      <span>♻️</span><span class="label">Routines</span>
+    </div>
+
+    <div class="nav-section-label">Workflows</div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <span>📁</span><span class="label">Projects</span>
+    </div>
+    <div class="nav-item" onclick="showPage('content')">
+      <span>🎬</span><span class="label">Content</span>
+    </div>
+    <div class="nav-item" onclick="showPage('people')">
+      <span>👥</span><span class="label">People</span>
+    </div>
+    <div class="nav-item" onclick="showPage('library')">
+      <span>📚</span><span class="label">Library</span>
+    </div>
+
+    <div class="nav-section-label">System</div>
+    <div class="nav-item" onclick="showPage('settings')">
+      <span>⚙️</span><span class="label">Settings</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰ Sidebar</button>
+      <button class="toggle-btn" onclick="toggleStudy()">📚 Study</button>
+      <button class="toggle-btn" onclick="cycleTheme()">🎨 Theme</button>
+    </div>
+
+    <div id="studyPanel" class="study-panel hidden">
+      <section class="card" style="margin-top:10px;">
+        <h2>Study</h2>
+
+        <details open>
+          <summary>Study Queue</summary>
+          <div class="toggle-content">
+            <ul style="font-size:13px; color:var(--muted); padding-left:18px;">
+              <li>Read Chapter 1: Introduction to Demo Content</li>
+              <li>Review Flashcards — Deck A</li>
+              <li>Watch Lecture 4: Core Concepts</li>
+              <li>Complete Practice Quiz</li>
+              <li>Draft summary of key terms</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Active Study Session</summary>
+          <div class="toggle-content">
+            <div class="embed-box">
+              Currently studying:<br>
+              <strong>Demo Subject — Chapter 1</strong><br><br>
+              Notes open on right panel.<br>
+              Video paused at 14:02.<br>
+              AI “Explain this” ready.
+            </div>
+          </div>
+        </details>
+
+        <details open>
+          <summary>Study Notes</summary>
+          <div class="toggle-content">
+            <div id="studyNotes" class="search-results">
+              • Concept A is defined as the foundation of the system.<br>
+              • Always double-check edge cases before moving on.<br>
+              • The primary focus should be on consistent application.<br>
+              • Note to self: Review this section again tomorrow.<br>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <div class="main-inner">
+
+      <div id="page-today">
+        <div class="embed-box">
+          Add your embedded content here (e.g., Google Calendar, daily doc, or overview).
+        </div>
+
+        <div class="top-image" style="
+          background-image: url('banner.png');
+          background-size: cover;
+          background-position: center;
+        "></div>
+
+        <div class="columns-wrapper">
+
+          <div class="column">
+            <div class="resize-handle"></div>
+            <section class="card">
+              <h2>Today</h2>
+
+              <details open>
+                <summary>Quick Capture</summary>
+                <div class="toggle-content">
+                  <form class="quick-form" onsubmit="handleQuickCapture(event)">
+                    <input type="text" id="quickInput" placeholder="e.g. change water filter tomorrow at 2pm" required />
+                    <button type="submit">Capture</button>
+                  </form>
+                  <div id="quickStatus" class="search-results">
+                    • Buy groceries<br>
+                    • Call dentist<br>
+                    • Review interview questions<br>
+                    • Water the plants<br>
+                  </div>
+                </div>
+              </details>
+
+              <details>
+                <summary>Search & Ask</summary>
+                <div class="toggle-content">
+                  <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search inside this dashboard…" />
+                    <button class="toggle-btn" type="button" onclick="handleSearch()">Search</button>
+                    <div id="searchResults" class="search-results">
+                      Try searching: “tasks”, “kanban”, “study notes”<br>
+                      For web search, use the <strong>Search</strong> page in the sidebar.
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <details>
+                <summary>Widgets</summary>
+                <div class="toggle-content">
+                  <div class="widgets-grid">
+                    <div class="widget-slot">Next Event: Interview Prep @ 3pm</div>
+                    <div class="widget-slot">Focus Timer: 25 min</div>
+                    <div class="widget-slot">Mood: Clear & Focused</div>
+                    <div class="widget-slot">Energy: 8/10</div>
+                  </div>
+                </div>
+              </details>
+
+            </section>
+          </div>
+
+          <div class="column">
+            <div class="resize-handle"></div>
+            <section class="card">
+              <h2>Tasks & Kanban</h2>
+
+              <details open>
+                <summary>Quick Tasks</summary>
+                <div class="toggle-content">
+                  <form class="quick-form" onsubmit="handleQuickTaskAdd(event)">
+                    <input type="text" id="quickTaskInput" placeholder="e.g. email recruiter, fix CSS bug" />
+                    <button type="submit">Add Task</button>
+                  </form>
+                  <ul id="quickTaskList" style="font-size:13px; color:var(--muted); padding-left:18px;">
+                    <li>Review pull requests</li>
+                    <li>Draft project outline</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details>
+                <summary>Google Sheets Kanban (Embedded)</summary>
+                <div class="toggle-content">
+                  <div class="embed-box">
+                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vREmUSqwcDtYXijs4x_2CiN5AjPWZx_raCAsHXDJn6xJKQ1SuFCB_qXj4WgjbAZ8wir18LEUOFohBTl/pubhtml?widget=true&amp;headers=false"
+                            width="100%" height="300"
+                            style="border:0; border-radius:12px;">
+                    </iframe>
+                  </div>
+                </div>
+              </details>
+
+              <details open>
+                <summary>Local Kanban Board</summary>
+                <div class="toggle-content">
+                  <div class="kanban">
+
+                    <div class="kanban-column">
+                      <h3>To Do</h3>
+                      <div class="kanban-list" ondragover="allowDrop(event)" ondrop="dropCard(event)">
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Write project proposal</div>
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Fix login bug</div>
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Prepare interview notes</div>
+                      </div>
+                    </div>
+
+                    <div class="kanban-column">
+                      <h3>Doing</h3>
+                      <div class="kanban-list" ondragover="allowDrop(event)" ondrop="dropCard(event)">
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Build dashboard layout</div>
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Refactor CSS grid</div>
+                      </div>
+                    </div>
+
+                    <div class="kanban-column">
+                      <h3>Done</h3>
+                      <div class="kanban-list" ondragover="allowDrop(event)" ondrop="dropCard(event)">
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Create Study Panel</div>
+                        <div class="kanban-card" draggable="true" ondragstart="dragCard(event)">Add Light/Dark/Lavender Theme</div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </details>
+
+            </section>
+          </div>
+
+          <div class="column">
+            <section class="card">
+              <h2>Routines & Streaks</h2>
+
+              <details open>
+                <summary>Daily Routines</summary>
+                <div class="toggle-content">
+                  <form class="quick-form" onsubmit="handleDailyRoutineAdd(event)">
+                    <input type="text" id="dailyRoutineInput" placeholder="e.g. AM meditation, 10 min" />
+                    <button type="submit">Add Routine</button>
+                  </form>
+                  <ul id="dailyRoutineList" style="font-size:13px; color:var(--muted); padding-left:18px;">
+                    <li>AM: Meditation — 12‑day streak</li>
+                    <li>PM: Reading — 7‑day streak</li>
+                    <li>Daily Walk — 30‑day streak</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details>
+                <summary>Monthly Challenges</summary>
+                <div class="toggle-content">
+                  <form class="quick-form" onsubmit="handleMonthlyChallengeAdd(event)">
+                    <input type="text" id="monthlyChallengeInput" placeholder="e.g. 30‑day coding challenge" />
+                    <button type="submit">Add Challenge</button>
+                  </form>
+                  <ul id="monthlyChallengeList" style="font-size:13px; color:var(--muted); padding-left:18px;">
+                    <li>30‑day reading streak</li>
+                    <li>Daily 5K walk</li>
+                  </ul>
+                </div>
+              </details>
+
+            </section>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="page-search" style="display:none;">
+        <section class="card">
+          <h2>Search</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            This page gives you multiple ways to search:
+            local dashboard search, Google web search, and quick links to other engines.
+          </p>
+        </section>
+
+        <div class="search-layout" style="margin-top:16px;">
+
+          <section class="card search-card">
+            <h2>Local Search</h2>
+            <div class="search-box">
+              <input type="text" id="searchInputGlobal" placeholder="Search inside this dashboard…" />
+              <button class="toggle-btn" type="button" onclick="handleSearchGlobal()">Search</button>
+              <div id="searchResultsGlobal" class="search-results">
+                This searches all cards and pages in this dashboard.
+              </div>
+            </div>
+
+            <hr style="margin:12px 0; border:none; border-top:1px solid var(--border);" />
+
+            <h2 style="font-size:14px; margin-top:0;">Other Search Engines</h2>
+            <div class="search-engine-links">
+              <a href="https://www.google.com" target="_blank">Google Search (full site)</a>
+              <a href="https://search.brave.com" target="_blank">Brave Search</a>
+              <a href="https://duckduckgo.com" target="_blank">DuckDuckGo</a>
+              <a href="https://www.bing.com" target="_blank">Bing</a>
+            </div>
+          </section>
+
+          <section class="card search-card">
+            <h2>Google Web Search (Embedded)</h2>
+            <div class="embed-box" style="text-align:left;">
+              <p style="font-size:13px; color:var(--muted); margin-top:0;">
+                This is a Google Custom Search Engine that searches the web.
+              </p>
+              <script async src="https://cse.google.com/cse.js?cx=017576662512468239146:omuauf_lfve"></script>
+              <div class="gcse-search"></div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <div id="page-tasks" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., Google Sheet of tasks, Kanban, or planning doc).
+        </div>
+
+        <section class="card">
+          <h2>Tasks</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            This page can hold a more detailed task list, backlog, or planning view.
+            You can mirror or extend the Kanban from Today, or keep separate “deep work” tasks here.
+          </p>
+
+          <details open>
+            <summary>Google Sheets Kanban (Embedded)</summary>
+            <div class="toggle-content">
+              <div class="embed-box">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vREmUSqwcDtYXijs4x_2CiN5AjPWZx_raCAsHXDJn6xJKQ1SuFCB_qXj4WgjbAZ8wir18LEUOFohBTl/pubhtml?widget=true&amp;headers=false"
+                        width="100%" height="400"
+                        style="border:0; border-radius:12px;">
+                </iframe>
+              </div>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <div id="page-routines" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., habit tracker in Google Sheets).
+        </div>
+
+        <section class="card">
+          <h2>Routines</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            Use this page for a more detailed habit system: weekly views, monthly streaks,
+            or reflections on how routines are going.
+          </p>
+        </section>
+      </div>
+
+      <div id="page-projects" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., master project doc or roadmap).
+        </div>
+
+        <section class="card">
+          <h2>Projects</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            This page can list active projects, their status, and links to deeper docs.
+            Think of it as your “control tower” for bigger efforts.
+          </p>
+        </section>
+      </div>
+
+      <div id="page-content" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., content calendar, ideas doc, or script outline).
+        </div>
+
+        <section class="card">
+          <h2>Content</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            Use this page to track content ideas, drafts, publishing dates, and platforms.
+          </p>
+        </section>
+      </div>
+
+      <div id="page-people" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., relationship map, CRM sheet, or contact notes).
+        </div>
+
+        <section class="card">
+          <h2>People</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            This page can hold notes about collaborators, mentors, friends, and key relationships,
+            plus follow‑up reminders or conversation notes.
+          </p>
+        </section>
+      </div>
+
+      <div id="page-library" style="display:none;">
+        <div class="embed-box">
+          Add your embedded content here (e.g., reading list, PDF index, or study catalog).
+        </div>
+
+        <section class="card">
+          <h2>Library</h2>
+          <p style="font-size:13px; color:var(--muted);">
+            Use this page as a catalog of books, PDFs, courses, and reference material.
+          </p>
+        </section>
+      </div>
+
+      <div id="page-settings" style="display:none;">
+        <section class="card">
+          <h2>General Settings</h2>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5;">
+            This section will hold general preferences like theme, layout, and sidebar behavior.
+            For now, everything is set to simple defaults.
+          </p>
+        </section>
+
+        <section class="card" style="margin-top:20px;">
+          <h2>Database Settings</h2>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5;">
+            Right now, this dashboard is using sample data only.
+            Nothing is being saved permanently — everything resets when you refresh.<br><br>
+
+            The nice part is that this dashboard is designed to grow with you.
+            Whenever you're ready, you can plug in a real database.<br><br>
+
+            You can use:<br>
+            • A simple JSON file stored on your computer<br>
+            • A SQLite file (a tiny real database)<br>
+            • LocalStorage (built into your browser)<br>
+            • Or even a cloud database later on<br><br>
+
+            This dashboard is flexible on purpose.
+            Swap in a different data source whenever you want.
+          </p>
+        </section>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------
+   THEME CYCLE (LIGHT → DARK → LAVENDER → LIGHT)
+--------------------------------------------------- */
+function cycleTheme() {
+  const body = document.body;
+  const isDark = body.classList.contains("dark");
+  const isLavender = body.classList.contains("lavender");
+
+  if (!isDark && !isLavender) {
+    body.classList.add("dark");
+  } else if (isDark) {
+    body.classList.remove("dark");
+    body.classList.add("lavender");
+  } else {
+    body.classList.remove("lavender");
+  }
+}
+
+/* ---------------------------------------------------
+   SIDEBAR COLLAPSE
+--------------------------------------------------- */
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
+
+/* ---------------------------------------------------
+   STUDY PANEL TOGGLE
+--------------------------------------------------- */
+function toggleStudy() {
+  const panel = document.getElementById("studyPanel");
+  panel.classList.toggle("hidden");
+}
+
+/* ---------------------------------------------------
+   SIMPLE PAGE SWITCHING
+--------------------------------------------------- */
+function showPage(page) {
+  const pages = [
+    "today",
+    "search",
+    "tasks",
+    "routines",
+    "projects",
+    "content",
+    "people",
+    "library",
+    "settings"
+  ];
+
+  pages.forEach(p => {
+    const el = document.getElementById("page-" + p);
+    if (el) el.style.display = (p === page) ? "block" : "none";
+  });
+
+  // update active nav item
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.remove("active");
+  });
+  const selector = ".nav-item[onclick*=\"showPage('" + page + "')\"]";
+  const activeItem = document.querySelector(selector);
+  if (activeItem) activeItem.classList.add("active");
+}
+
+/* ---------------------------------------------------
+   COLUMN RESIZING
+--------------------------------------------------- */
+let isResizing = false;
+let currentColumn = null;
+
+document.addEventListener("mousedown", e => {
+  if (e.target.classList.contains("resize-handle")) {
+    isResizing = true;
+    currentColumn = e.target.parentElement;
+    document.body.style.cursor = "col-resize";
+  }
+});
+
+document.addEventListener("mousemove", e => {
+  if (!isResizing || !currentColumn) return;
+  const rect = currentColumn.getBoundingClientRect();
+  const newWidth = e.clientX - rect.left;
+  if (newWidth > 120) {
+    currentColumn.style.width = newWidth + "px";
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  isResizing = false;
+  currentColumn = null;
+  document.body.style.cursor = "default";
+});
+
+/* ---------------------------------------------------
+   KANBAN DRAG & DROP
+--------------------------------------------------- */
+let draggedCard = null;
+
+function dragCard(event) {
+  draggedCard = event.target;
+}
+
+function allowDrop(event) {
+  event.preventDefault();
+}
+
+function dropCard(event) {
+  event.preventDefault();
+  const target = event.target.classList.contains("kanban-list")
+    ? event.target
+    : event.target.closest(".kanban-list");
+  if (draggedCard && target) {
+    target.appendChild(draggedCard);
+  }
+}
+
+/* ---------------------------------------------------
+   QUICK CAPTURE (GENERAL INBOX)
+--------------------------------------------------- */
+function handleQuickCapture(event) {
+  event.preventDefault();
+  const input = document.getElementById("quickInput");
+  const status = document.getElementById("quickStatus");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const line = "• " + text + "<br>";
+  status.innerHTML = line + status.innerHTML;
+  input.value = "";
+}
+
+/* ---------------------------------------------------
+   QUICK TASKS (TASK-SPECIFIC INBOX)
+--------------------------------------------------- */
+function handleQuickTaskAdd(event) {
+  event.preventDefault();
+  const input = document.getElementById("quickTaskInput");
+  const list = document.getElementById("quickTaskList");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const li = document.createElement("li");
+  li.textContent = text;
+  list.prepend(li);
+  input.value = "";
+}
+
+/* ---------------------------------------------------
+   DAILY ROUTINES INPUT
+--------------------------------------------------- */
+function handleDailyRoutineAdd(event) {
+  event.preventDefault();
+  const input = document.getElementById("dailyRoutineInput");
+  const list = document.getElementById("dailyRoutineList");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const li = document.createElement("li");
+  li.textContent = text;
+  list.prepend(li);
+  input.value = "";
+}
+
+/* ---------------------------------------------------
+   MONTHLY CHALLENGES INPUT
+--------------------------------------------------- */
+function handleMonthlyChallengeAdd(event) {
+  event.preventDefault();
+  const input = document.getElementById("monthlyChallengeInput");
+  const list = document.getElementById("monthlyChallengeList");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const li = document.createElement("li");
+  li.textContent = text;
+  list.prepend(li);
+  input.value = "";
+}
+
+/* ---------------------------------------------------
+   LOCAL SEARCH (TODAY PAGE)
+--------------------------------------------------- */
+function handleSearch() {
+  const query = document.getElementById("searchInput").value.trim().toLowerCase();
+  const out = document.getElementById("searchResults");
+
+  if (!query) {
+    out.textContent = "Enter something to search.";
+    return;
+  }
+
+  const cards = Array.from(document.querySelectorAll(".card"));
+  const matches = cards.filter(card =>
+    card.innerText.toLowerCase().includes(query)
+  );
+
+  if (matches.length === 0) {
+    out.textContent = "No matches found in your dashboard for: “" + query + "”.";
+    return;
+  }
+
+  const titles = matches
+    .map(card => card.querySelector("h2")?.innerText || "Untitled card")
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+
+  out.innerHTML =
+    "Found matches in:<br>• " + titles.join("<br>• ");
+}
+
+/* ---------------------------------------------------
+   LOCAL SEARCH (SEARCH PAGE)
+--------------------------------------------------- */
+function handleSearchGlobal() {
+  const query = document.getElementById("searchInputGlobal").value.trim().toLowerCase();
+  const out = document.getElementById("searchResultsGlobal");
+
+  if (!query) {
+    out.textContent = "Enter something to search.";
+    return;
+  }
+
+  const cards = Array.from(document.querySelectorAll(".card"));
+  const matches = cards.filter(card =>
+    card.innerText.toLowerCase().includes(query)
+  );
+
+  if (matches.length === 0) {
+    out.textContent = "No matches found in your dashboard for: “" + query + "”.";
+    return;
+  }
+
+  const titles = matches
+    .map(card => card.querySelector("h2")?.innerText || "Untitled card")
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+
+  out.innerHTML =
+    "Found matches in:<br>• " + titles.join("<br>• ");
+}
+
+/* ---------------------------------------------------
+   INITIAL SETUP
+--------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  showPage("today");
+});
+</script>
+<footer style="margin-top:40px; padding:20px; text-align:center; font-size:14px; color:#666;">
+  <a href="index.html">Landing Page</a> |
+  <a href="dashboard.html">Dashboard</a> |
+  <a href="demo.html">Demo</a>
+</footer>
+</body>
+</html>
